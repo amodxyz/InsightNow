@@ -3,11 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth } from '@/lib/auth';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -18,13 +16,35 @@ export default function LoginPage() {
     setError('');
     setIsLoading(true);
 
-    const success = await login(email, password);
-    
-    if (success) {
-      router.push('/admin/');
-    } else {
-      setError('Invalid email or password');
+    try {
+      const { db } = await import('@/lib/firebase');
+      const { collection, query, where, getDocs } = await import('firebase/firestore');
+      
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('email', '==', email));
+      const snapshot = await getDocs(q);
+      
+      if (snapshot.empty) {
+        setError('User not found. Please run /setup first.');
+        setIsLoading(false);
+        return;
+      }
+
+      const userDoc = snapshot.docs[0];
+      const userData = { id: userDoc.id, ...userDoc.data() };
+
+      if (password.length >= 4) {
+        const userWithLogin = { ...userData, lastLogin: new Date().toISOString() };
+        localStorage.setItem('insightnow_user', JSON.stringify(userWithLogin));
+        router.push('/admin/');
+      } else {
+        setError('Password must be at least 4 characters');
+      }
+    } catch (err: unknown) {
+      console.error('Login error:', err);
+      setError('Database connection error. Please check Firebase setup.');
     }
+    
     setIsLoading(false);
   };
 
@@ -46,6 +66,13 @@ export default function LoginPage() {
             {error && (
               <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm">
                 {error}
+                {error.includes('setup') && (
+                  <div className="mt-2">
+                    <Link href="/setup" className="underline font-medium">
+                      Go to Setup Page
+                    </Link>
+                  </div>
+                )}
               </div>
             )}
             
@@ -82,9 +109,10 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-gray-500">
+          <div className="mt-6 text-center text-sm text-gray-500 space-y-2">
             <p>Demo credentials:</p>
-            <p className="font-mono text-xs mt-1">admin@insightnow.com / any password (4+ chars)</p>
+            <p className="font-mono text-xs">admin@insightnow.com / password</p>
+            <p className="text-xs">First time? <Link href="/setup" className="text-primary-600 hover:underline">Run Setup</Link></p>
           </div>
         </div>
       </div>
