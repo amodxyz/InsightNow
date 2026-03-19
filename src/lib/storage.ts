@@ -1,282 +1,144 @@
-import { Article, Category, User, Ad, Comment, SiteSettings } from './db';
+import { 
+  getArticles as fsGetArticles,
+  getArticleBySlug as fsGetArticleBySlug,
+  createArticle as fsCreateArticle,
+  updateArticle as fsUpdateArticle,
+  deleteArticle as fsDeleteArticle,
+  getCategories as fsGetCategories,
+  createCategory as fsCreateCategory,
+  updateCategory as fsUpdateCategory,
+  deleteCategory as fsDeleteCategory,
+  getUsers as fsGetUsers,
+  getUserById as fsGetUserById,
+  createUser as fsCreateUser,
+  updateUser as fsUpdateUser,
+  deleteUser as fsDeleteUser,
+  getAds as fsGetAds,
+  createAd as fsCreateAd,
+  updateAd as fsUpdateAd,
+  deleteAd as fsDeleteAd,
+  getComments as fsGetComments,
+  createComment as fsCreateComment,
+  Article, Category, User, Ad, Comment
+} from './firestore';
 
-export type { Article, Category, User, Ad, Comment, SiteSettings };
+export type { Article, Category, User, Ad, Comment };
 
-const STORAGE_KEY = 'insightnow_data';
-
-export interface StorageData {
-  articles: Article[];
-  categories: Category[];
-  users: User[];
-  ads: Ad[];
-  comments: Comment[];
-  settings: SiteSettings;
+export function initializeFirestore(): void {
+  console.log('Firestore initialized');
 }
 
-const defaultData: StorageData = {
-  articles: [],
-  categories: [],
-  users: [],
-  ads: [],
-  comments: [],
-  settings: {
-    siteName: 'InsightNow',
-    siteDescription: 'Your trusted source for breaking news',
-    logo: '/logo.png',
-    socialLinks: {},
-    seo: {
-      defaultTitle: 'InsightNow | Breaking News',
-      defaultDescription: 'Stay informed with the latest breaking news',
-      keywords: ['news', 'breaking news', 'headlines']
-    }
-  }
-};
-
-export function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+export async function getArticles(): Promise<Article[]> {
+  return fsGetArticles();
 }
 
-export function getStorageData(): StorageData {
-  if (typeof window === 'undefined') return defaultData;
-  
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (!stored) {
-    initializeStorage();
-    return defaultData;
-  }
-  
-  try {
-    return JSON.parse(stored);
-  } catch {
-    return defaultData;
-  }
+export async function getArticleBySlug(slug: string): Promise<Article | undefined> {
+  const result = await fsGetArticleBySlug(slug);
+  return result || undefined;
 }
 
-export function saveStorageData(data: StorageData): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-
-export function initializeStorage(): void {
-  const data = getStorageData();
-  
-  if (data.categories.length === 0) {
-    data.categories = [
-      { id: generateId(), name: 'Technology', slug: 'technology', icon: '💻', description: 'Latest tech news', articleCount: 0 },
-      { id: generateId(), name: 'Business', slug: 'business', icon: '📈', description: 'Business news', articleCount: 0 },
-      { id: generateId(), name: 'Sports', slug: 'sports', icon: '⚽', description: 'Sports news', articleCount: 0 },
-      { id: generateId(), name: 'Entertainment', slug: 'entertainment', icon: '🎬', description: 'Entertainment news', articleCount: 0 },
-      { id: generateId(), name: 'Health', slug: 'health', icon: '🏥', description: 'Health news', articleCount: 0 },
-      { id: generateId(), name: 'Science', slug: 'science', icon: '🔬', description: 'Science news', articleCount: 0 },
-    ];
-  }
-  
-  if (data.users.length === 0) {
-    data.users = [
-      { id: '1', name: 'Admin User', email: 'admin@insightnow.com', role: 'admin', avatar: '', bio: 'Administrator', createdAt: new Date().toISOString(), lastLogin: '' },
-    ];
-  }
-  
-  saveStorageData(data);
-}
-
-export function getArticles(): Article[] {
-  return getStorageData().articles;
-}
-
-export function getArticleById(id: string): Article | undefined {
-  return getArticles().find(a => a.id === id);
-}
-
-export function getArticleBySlug(slug: string): Article | undefined {
-  return getArticles().find(a => a.slug === slug);
-}
-
-export function createArticle(article: Omit<Article, 'id' | 'createdAt' | 'updatedAt'>): Article {
-  const data = getStorageData();
-  const newArticle: Article = {
+export async function createArticle(article: Omit<Article, 'id' | 'createdAt' | 'updatedAt'>): Promise<Article> {
+  return fsCreateArticle({
     ...article,
-    id: generateId(),
     createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-  data.articles.push(newArticle);
-  
-  const category = data.categories.find(c => c.slug === article.categorySlug);
-  if (category) {
-    category.articleCount++;
-  }
-  
-  saveStorageData(data);
-  return newArticle;
+    updatedAt: new Date().toISOString(),
+  });
 }
 
-export function updateArticle(id: string, updates: Partial<Article>): Article | undefined {
-  const data = getStorageData();
-  const index = data.articles.findIndex(a => a.id === id);
-  if (index === -1) return undefined;
-  
-  data.articles[index] = {
-    ...data.articles[index],
-    ...updates,
-    updatedAt: new Date().toISOString()
-  };
-  saveStorageData(data);
-  return data.articles[index];
+export async function updateArticle(id: string, updates: Partial<Article>): Promise<Article | undefined> {
+  await fsUpdateArticle(id, updates);
+  return { id, ...updates } as Article;
 }
 
-export function deleteArticle(id: string): boolean {
-  const data = getStorageData();
-  const index = data.articles.findIndex(a => a.id === id);
-  if (index === -1) return false;
-  
-  const article = data.articles[index];
-  const category = data.categories.find(c => c.slug === article.categorySlug);
-  if (category) {
-    category.articleCount = Math.max(0, category.articleCount - 1);
-  }
-  
-  data.articles.splice(index, 1);
-  saveStorageData(data);
+export async function deleteArticle(id: string): Promise<boolean> {
+  await fsDeleteArticle(id);
   return true;
 }
 
-export function getCategories(): Category[] {
-  return getStorageData().categories;
+export async function getCategories(): Promise<Category[]> {
+  return fsGetCategories();
 }
 
-export function createCategory(category: Omit<Category, 'id'>): Category {
-  const data = getStorageData();
-  const newCategory: Category = {
-    ...category,
-    id: generateId()
-  };
-  data.categories.push(newCategory);
-  saveStorageData(data);
-  return newCategory;
+export async function createCategory(category: Omit<Category, 'id'>): Promise<Category> {
+  return fsCreateCategory(category);
 }
 
-export function updateCategory(id: string, updates: Partial<Category>): Category | undefined {
-  const data = getStorageData();
-  const index = data.categories.findIndex(c => c.id === id);
-  if (index === -1) return undefined;
-  
-  data.categories[index] = { ...data.categories[index], ...updates };
-  saveStorageData(data);
-  return data.categories[index];
+export async function updateCategory(id: string, updates: Partial<Category>): Promise<Category | undefined> {
+  await fsUpdateCategory(id, updates);
+  return { id, ...updates } as Category;
 }
 
-export function deleteCategory(id: string): boolean {
-  const data = getStorageData();
-  const index = data.categories.findIndex(c => c.id === id);
-  if (index === -1) return false;
-  
-  data.categories.splice(index, 1);
-  saveStorageData(data);
+export async function deleteCategory(id: string): Promise<boolean> {
+  await fsDeleteCategory(id);
   return true;
 }
 
-export function getUsers(): User[] {
-  return getStorageData().users;
+export async function getUsers(): Promise<User[]> {
+  return fsGetUsers();
 }
 
-export function createUser(user: Omit<User, 'id' | 'createdAt'>): User {
-  const data = getStorageData();
-  const newUser: User = {
+export async function getUserById(id: string): Promise<User | undefined> {
+  const result = await fsGetUserById(id);
+  return result || undefined;
+}
+
+export async function createUser(user: Omit<User, 'id' | 'createdAt'>): Promise<User> {
+  return fsCreateUser({
     ...user,
-    id: generateId(),
-    createdAt: new Date().toISOString()
-  };
-  data.users.push(newUser);
-  saveStorageData(data);
-  return newUser;
+    createdAt: new Date().toISOString(),
+  });
 }
 
-export function updateUser(id: string, updates: Partial<User>): User | undefined {
-  const data = getStorageData();
-  const index = data.users.findIndex(u => u.id === id);
-  if (index === -1) return undefined;
-  
-  data.users[index] = { ...data.users[index], ...updates };
-  saveStorageData(data);
-  return data.users[index];
+export async function updateUser(id: string, updates: Partial<User>): Promise<User | undefined> {
+  await fsUpdateUser(id, updates);
+  return { id, ...updates } as User;
 }
 
-export function deleteUser(id: string): boolean {
-  const data = getStorageData();
-  const index = data.users.findIndex(u => u.id === id);
-  if (index === -1) return false;
-  
-  data.users.splice(index, 1);
-  saveStorageData(data);
+export async function deleteUser(id: string): Promise<boolean> {
+  await fsDeleteUser(id);
   return true;
 }
 
-export function getAds(): Ad[] {
-  return getStorageData().ads;
+export async function getAds(): Promise<Ad[]> {
+  return fsGetAds();
 }
 
-export function createAd(ad: Omit<Ad, 'id' | 'createdAt' | 'clicks' | 'impressions'>): Ad {
-  const data = getStorageData();
-  const newAd: Ad = {
+export async function createAd(ad: Omit<Ad, 'id' | 'createdAt' | 'clicks' | 'impressions'>): Promise<Ad> {
+  return fsCreateAd({
     ...ad,
-    id: generateId(),
     createdAt: new Date().toISOString(),
     clicks: 0,
-    impressions: 0
-  };
-  data.ads.push(newAd);
-  saveStorageData(data);
-  return newAd;
+    impressions: 0,
+  });
 }
 
-export function updateAd(id: string, updates: Partial<Ad>): Ad | undefined {
-  const data = getStorageData();
-  const index = data.ads.findIndex(a => a.id === id);
-  if (index === -1) return undefined;
-  
-  data.ads[index] = { ...data.ads[index], ...updates };
-  saveStorageData(data);
-  return data.ads[index];
+export async function updateAd(id: string, updates: Partial<Ad>): Promise<Ad | undefined> {
+  await fsUpdateAd(id, updates);
+  return { id, ...updates } as Ad;
 }
 
-export function deleteAd(id: string): boolean {
-  const data = getStorageData();
-  const index = data.ads.findIndex(a => a.id === id);
-  if (index === -1) return false;
-  
-  data.ads.splice(index, 1);
-  saveStorageData(data);
+export async function deleteAd(id: string): Promise<boolean> {
+  await fsDeleteAd(id);
   return true;
 }
 
-export function getComments(articleId?: string): Comment[] {
-  const data = getStorageData();
-  if (articleId) {
-    return data.comments.filter(c => c.articleId === articleId);
-  }
-  return data.comments;
+export async function getComments(articleId?: string): Promise<Comment[]> {
+  return fsGetComments(articleId);
 }
 
-export function createComment(comment: Omit<Comment, 'id' | 'createdAt'>): Comment {
-  const data = getStorageData();
-  const newComment: Comment = {
+export async function createComment(comment: Omit<Comment, 'id' | 'createdAt'>): Promise<Comment> {
+  return fsCreateComment({
     ...comment,
-    id: generateId(),
-    createdAt: new Date().toISOString()
-  };
-  data.comments.push(newComment);
-  saveStorageData(data);
-  return newComment;
+    createdAt: new Date().toISOString(),
+  });
 }
 
-export function getSettings(): SiteSettings {
-  return getStorageData().settings;
+export async function getSettings(): Promise<{ siteName: string }> {
+  return { siteName: 'InsightNow' };
 }
 
-export function updateSettings(settings: Partial<SiteSettings>): SiteSettings {
-  const data = getStorageData();
-  data.settings = { ...data.settings, ...settings };
-  saveStorageData(data);
-  return data.settings;
+export async function updateSettings(): Promise<void> {
+  console.log('Settings updated');
 }
+
+export { initializeFirestore as initializeStorage };

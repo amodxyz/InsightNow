@@ -16,8 +16,12 @@ export default function ArticlesPage() {
   const [filterStatus, setFilterStatus] = useState('all');
 
   useEffect(() => {
-    initializeStorage();
-    setArticles(getArticles());
+    const loadArticles = async () => {
+      initializeStorage();
+      const data = await getArticles();
+      setArticles(data);
+    };
+    loadArticles();
   }, []);
 
   const filteredArticles = articles.filter(article => {
@@ -27,10 +31,11 @@ export default function ArticlesPage() {
     return matchesSearch && matchesStatus;
   });
 
-  const handleDelete = (id: string, title: string) => {
+  const handleDelete = async (id: string, title: string) => {
     if (confirm(`Delete "${title}"?`)) {
-      deleteArticle(id);
-      setArticles(getArticles());
+      await deleteArticle(id);
+      const data = await getArticles();
+      setArticles(data);
     }
   };
 

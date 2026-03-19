@@ -34,12 +34,15 @@ export default function CommentsSection({ articleSlug }: { articleSlug: string }
   const [saveInfo, setSaveInfo] = useState(false);
 
   useEffect(() => {
-    initializeStorage();
-    loadComments();
+    const init = async () => {
+      initializeStorage();
+      await loadComments();
+    };
+    init();
   }, [articleSlug]);
 
-  const loadComments = () => {
-    const storedComments = getComments(articleSlug);
+  const loadComments = async () => {
+    const storedComments = await getComments(articleSlug);
     const commentMap = new Map<string, Comment>();
     
     storedComments.forEach((c: StoredComment) => {
@@ -88,10 +91,10 @@ export default function CommentsSection({ articleSlug }: { articleSlug: string }
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    createComment({
+    await createComment({
       articleId: articleSlug,
       author: newComment.name,
       email: newComment.email,
@@ -105,12 +108,12 @@ export default function CommentsSection({ articleSlug }: { articleSlug: string }
       localStorage.setItem('commenter_email', newComment.email);
     }
 
-    loadComments();
+    await loadComments();
     setNewComment({ name: '', email: '', content: '' });
   };
 
-  const handleReply = (parentId: string) => {
-    createComment({
+  const handleReply = async (parentId: string) => {
+    await createComment({
       articleId: articleSlug,
       author: replyForm.name,
       email: replyForm.email,
@@ -119,7 +122,7 @@ export default function CommentsSection({ articleSlug }: { articleSlug: string }
       status: 'approved',
     });
 
-    loadComments();
+    await loadComments();
     setReplyTo(null);
     setReplyForm({ name: '', email: '', content: '' });
   };

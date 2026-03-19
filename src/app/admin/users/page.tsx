@@ -25,8 +25,12 @@ export default function UsersPage() {
   });
 
   useEffect(() => {
-    initializeStorage();
-    setUsers(getUsers());
+    const loadUsers = async () => {
+      initializeStorage();
+      const data = await getUsers();
+      setUsers(data);
+    };
+    loadUsers();
   }, []);
 
   const filteredUsers = users.filter(user => {
@@ -36,9 +40,9 @@ export default function UsersPage() {
     return matchesSearch && matchesRole;
   });
 
-  const handleCreateUser = (e: React.FormEvent) => {
+  const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    createUser({
+    await createUser({
       name: newUser.name,
       email: newUser.email,
       role: newUser.role,
@@ -46,15 +50,17 @@ export default function UsersPage() {
       bio: newUser.bio,
       lastLogin: '',
     });
-    setUsers(getUsers());
+    const data = await getUsers();
+    setUsers(data);
     setNewUser({ name: '', email: '', role: 'author', bio: '' });
     setIsModalOpen(false);
   };
 
-  const handleDelete = (id: string, name: string) => {
+  const handleDelete = async (id: string, name: string) => {
     if (confirm(`Delete "${name}"?`)) {
-      deleteUser(id);
-      setUsers(getUsers());
+      await deleteUser(id);
+      const data = await getUsers();
+      setUsers(data);
     }
   };
 

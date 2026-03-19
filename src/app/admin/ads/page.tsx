@@ -26,8 +26,12 @@ export default function AdsPage() {
   const [filterPosition, setFilterPosition] = useState('all');
 
   useEffect(() => {
-    initializeStorage();
-    setAds(getAds());
+    const loadAds = async () => {
+      initializeStorage();
+      const data = await getAds();
+      setAds(data);
+    };
+    loadAds();
   }, []);
 
   const filteredAds = ads.filter(ad => {
@@ -41,10 +45,11 @@ export default function AdsPage() {
   const totalClicks = ads.reduce((acc, ad) => acc + ad.clicks, 0);
   const avgCTR = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) : '0.00';
 
-  const handleDelete = (id: string, title: string) => {
+  const handleDelete = async (id: string, title: string) => {
     if (confirm(`Delete "${title}"?`)) {
-      deleteAd(id);
-      setAds(getAds());
+      await deleteAd(id);
+      const data = await getAds();
+      setAds(data);
     }
   };
 

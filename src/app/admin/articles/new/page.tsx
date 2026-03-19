@@ -27,9 +27,12 @@ export default function NewArticlePage() {
   });
 
   useEffect(() => {
-    initializeStorage();
-    const cats = getCategories();
-    setCategories(cats.map(c => ({ name: c.name, slug: c.slug })));
+    const loadCategories = async () => {
+      initializeStorage();
+      const cats = await getCategories();
+      setCategories(cats.map(c => ({ name: c.name, slug: c.slug })));
+    };
+    loadCategories();
   }, []);
 
   const handleContentChange = (html: string) => {
@@ -64,7 +67,7 @@ export default function NewArticlePage() {
       const tagsArray = article.tags.split(',').map(t => t.trim()).filter(Boolean);
       const slug = article.slug || generateSlug(article.title);
       
-      createArticle({
+      await createArticle({
         title: article.title,
         slug,
         excerpt: article.excerpt,

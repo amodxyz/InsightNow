@@ -21,28 +21,34 @@ export default function CategoriesPage() {
   const [newCategory, setNewCategory] = useState({ name: '', slug: '', icon: '📰', description: '' });
 
   useEffect(() => {
-    initializeStorage();
-    setCategories(getCategories());
+    const loadCategories = async () => {
+      initializeStorage();
+      const data = await getCategories();
+      setCategories(data);
+    };
+    loadCategories();
   }, []);
 
-  const handleCreateCategory = (e: React.FormEvent) => {
+  const handleCreateCategory = async (e: React.FormEvent) => {
     e.preventDefault();
-    createCategory({
+    await createCategory({
       name: newCategory.name,
       slug: newCategory.slug || newCategory.name.toLowerCase().replace(/\s+/g, '-'),
       icon: newCategory.icon,
       description: newCategory.description,
       articleCount: 0,
     });
-    setCategories(getCategories());
+    const data = await getCategories();
+    setCategories(data);
     setNewCategory({ name: '', slug: '', icon: '📰', description: '' });
     setIsModalOpen(false);
   };
 
-  const handleDelete = (id: string, name: string) => {
+  const handleDelete = async (id: string, name: string) => {
     if (confirm(`Delete "${name}" category?`)) {
-      deleteCategory(id);
-      setCategories(getCategories());
+      await deleteCategory(id);
+      const data = await getCategories();
+      setCategories(data);
     }
   };
 
