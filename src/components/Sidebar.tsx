@@ -92,11 +92,22 @@ export default function Sidebar() {
           <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-accent-400 to-accent-600 rounded-xl sm:rounded-2xl mx-auto mb-3 sm:mb-4 flex items-center justify-center">
             <span className="text-2xl sm:text-3xl">⚡</span>
           </div>
-          <h3 className="text-base sm:text-xl font-bold mb-1 sm:mb-2">Go Premium</h3>
-          <p className="text-gray-300 text-xs sm:text-sm mb-3 sm:mb-4">Get exclusive content and ad-free.</p>
-          <button className="w-full px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-accent-500 to-accent-600 rounded-lg sm:rounded-xl font-semibold hover:shadow-lg transition-all text-sm">
-            Upgrade Now
-          </button>
+          <h3 className="text-base sm:text-xl font-bold mb-1 sm:mb-2">Stay Updated</h3>
+          <p className="text-gray-300 text-xs sm:text-sm mb-3 sm:mb-4">Get breaking news in your inbox.</p>
+          <form className="space-y-2" onSubmit={(e) => e.preventDefault()}>
+            <input
+              type="email"
+              placeholder="your@email.com"
+              className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 text-sm focus:outline-none focus:border-white/40"
+              required
+            />
+            <button
+              type="submit"
+              className="w-full px-4 py-2 bg-gradient-to-r from-accent-500 to-accent-600 rounded-lg font-semibold hover:shadow-lg transition-all text-sm"
+            >
+              Subscribe
+            </button>
+          </form>
         </div>
       </div>
 
