@@ -56,7 +56,7 @@ export default function PrivacyPolicyPage() {
 
         <h2 className="text-2xl font-semibold text-gray-900 mt-8">7. Your Rights</h2>
         <p>
-          You have the right to access, update, or delete your personal information. Contact us at privacy@insightnow.com for any requests.
+          You have the right to access, update, or delete your personal information. Contact us at privacy@amodkumar.com for any requests.
         </p>
 
         <h2 className="text-2xl font-semibold text-gray-900 mt-8">8. Changes to This Policy</h2>
@@ -67,7 +67,7 @@ export default function PrivacyPolicyPage() {
         <h2 className="text-2xl font-semibold text-gray-900 mt-8">9. Contact Us</h2>
         <p>
           If you have any questions about this Privacy Policy, please contact us at:<br />
-          Email: privacy@insightnow.com
+          Email: privacy@amodkumar.com
         </p>
       </div>
     </div>

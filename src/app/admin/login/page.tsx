@@ -84,7 +84,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-                placeholder="admin@insightnow.com"
+                placeholder="admin@amodkumar.com"
               />
             </div>
 
@@ -111,7 +111,7 @@ export default function LoginPage() {
 
           <div className="mt-6 text-center text-sm text-gray-500 space-y-2">
             <p>Demo credentials:</p>
-            <p className="font-mono text-xs">admin@insightnow.com / password</p>
+            <p className="font-mono text-xs">admin@amodkumar.com / password</p>
             <p className="text-xs">First time? <Link href="/setup" className="text-primary-600 hover:underline">Run Setup</Link></p>
           </div>
         </div>

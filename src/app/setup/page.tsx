@@ -16,9 +16,9 @@ const initialCategories = [
 ];
 
 const initialUsers = [
-  { name: 'Admin User', email: 'admin@insightnow.com', role: 'admin', avatar: '', bio: 'Site administrator', createdAt: new Date().toISOString(), lastLogin: '' },
-  { name: 'Sarah Johnson', email: 'sarah@insightnow.com', role: 'editor', avatar: '', bio: 'Senior Editor', createdAt: new Date().toISOString(), lastLogin: '' },
-  { name: 'Mike Chen', email: 'mike@insightnow.com', role: 'author', avatar: '', bio: 'Tech Writer', createdAt: new Date().toISOString(), lastLogin: '' },
+  { name: 'Admin User', email: 'admin@amodkumar.com', role: 'admin', avatar: '', bio: 'Site administrator', createdAt: new Date().toISOString(), lastLogin: '' },
+  { name: 'Sarah Johnson', email: 'sarah@amodkumar.com', role: 'editor', avatar: '', bio: 'Senior Editor', createdAt: new Date().toISOString(), lastLogin: '' },
+  { name: 'Mike Chen', email: 'mike@amodkumar.com', role: 'author', avatar: '', bio: 'Tech Writer', createdAt: new Date().toISOString(), lastLogin: '' },
 ];
 
 const initialArticles = [

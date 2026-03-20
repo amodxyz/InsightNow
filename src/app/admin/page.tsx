@@ -151,7 +151,7 @@ export default function AdminDashboard() {
               <span className="text-xl">📧</span>
               <div>
                 <p className="font-medium text-gray-900">Contact Support</p>
-                <p className="text-sm text-gray-500">support@insightnow.com</p>
+                <p className="text-sm text-gray-500">support@amodkumar.com</p>
               </div>
             </div>
           </div>

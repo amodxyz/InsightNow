@@ -77,7 +77,7 @@ export default function TermsOfServicePage() {
         <h2 className="text-2xl font-semibold text-gray-900 mt-8">12. Contact Information</h2>
         <p>
           For questions about these Terms of Service, please contact us at:<br />
-          Email: legal@insightnow.com
+          Email: legal@amodkumar.com
         </p>
       </div>
     </div>

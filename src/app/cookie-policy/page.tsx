@@ -78,7 +78,7 @@ export default function CookiePolicyPage() {
         <h2 className="text-2xl font-semibold text-gray-900 mt-8">8. Contact Us</h2>
         <p>
           If you have questions about our use of cookies, please contact us at:<br />
-          Email: privacy@insightnow.com
+          Email: privacy@amodkumar.com
         </p>
       </div>
     </div>
