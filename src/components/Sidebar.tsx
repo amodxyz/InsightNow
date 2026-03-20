@@ -8,14 +8,30 @@ import AdBanner from './Ads';
 export default function Sidebar() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [loading, setLoading] = useState(false);
   const popularTags = ['AI', 'Stock Market', 'Championship', 'Movies', 'Health', 'Space', 'Startups', 'Innovation'];
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
-      setSubscribed(true);
-      setEmail('');
-      setTimeout(() => setSubscribed(false), 3000);
+    if (!email) return;
+    
+    setLoading(true);
+    try {
+      const res = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      
+      if (res.ok) {
+        setSubscribed(true);
+        setEmail('');
+        setTimeout(() => setSubscribed(false), 3000);
+      }
+    } catch (error) {
+      console.error('Subscription error:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -44,9 +60,10 @@ export default function Sidebar() {
           />
           <button
             type="submit"
-            className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white text-primary-600 rounded-lg sm:rounded-xl font-semibold hover:bg-gray-100 transition-colors text-sm"
+            disabled={loading}
+            className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white text-primary-600 rounded-lg sm:rounded-xl font-semibold hover:bg-gray-100 transition-colors text-sm disabled:opacity-50"
           >
-            Subscribe
+            {loading ? 'Subscribing...' : 'Subscribe'}
           </button>
         </form>
         {subscribed && (
