@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     description: 'Stay informed with InsightNow - Your trusted source for breaking news, latest headlines, in-depth analysis, and comprehensive coverage.',
     images: [
       {
-        url: '/og-image.jpg',
+        url: '/og-image.svg',
         width: 1200,
         height: 630,
         alt: 'InsightNow - Breaking News & Latest Headlines',
@@ -67,7 +67,7 @@ export const metadata: Metadata = {
     description: 'Stay informed with InsightNow - Your trusted source for breaking news and in-depth analysis.',
     site: '@insightnow',
     creator: '@insightnow',
-    images: ['/og-image.jpg'],
+    images: ['/og-image.svg'],
   },
   alternates: {
     canonical: 'https://insightnow.amodkumar.com',
