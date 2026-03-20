@@ -61,16 +61,11 @@ export default function Footer() {
                 Quick Links
               </h3>
               <ul className="space-y-2 sm:space-y-3">
-                {['Home', 'Search', 'About Us', 'Contact', 'Privacy Policy'].map((link) => (
-                  <li key={link}>
-                    <Link
-                      href={link === 'Home' ? '/' : `/${link.toLowerCase().replace(' ', '-')}/`}
-                      className="text-gray-400 hover:text-white transition-colors text-sm"
-                    >
-                      {link}
-                    </Link>
-                  </li>
-                ))}
+                <li><Link href="/" className="text-gray-400 hover:text-white transition-colors text-sm">Home</Link></li>
+                <li><Link href="/search/" className="text-gray-400 hover:text-white transition-colors text-sm">Search</Link></li>
+                <li><Link href="/privacy-policy/" className="text-gray-400 hover:text-white transition-colors text-sm">Privacy Policy</Link></li>
+                <li><Link href="/terms-of-service/" className="text-gray-400 hover:text-white transition-colors text-sm">Terms of Service</Link></li>
+                <li><Link href="/cookie-policy/" className="text-gray-400 hover:text-white transition-colors text-sm">Cookie Policy</Link></li>
               </ul>
             </div>
             
@@ -104,9 +99,9 @@ export default function Footer() {
             &copy; {currentYear} InsightNow. All rights reserved.
           </p>
           <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-400">
-            <Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="#" className="hover:text-white transition-colors">Terms of Service</Link>
-            <Link href="#" className="hover:text-white transition-colors">Cookie Policy</Link>
+            <Link href="/privacy-policy/" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link href="/terms-of-service/" className="hover:text-white transition-colors">Terms of Service</Link>
+            <Link href="/cookie-policy/" className="hover:text-white transition-colors">Cookie Policy</Link>
           </div>
         </div>
       </div>
