@@ -3,7 +3,7 @@ import './globals.css';
 import HeadlineTicker from '@/components/HeadlineTicker';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://yournewssite.com'),
+  metadataBase: new URL('https://insightnow.amodkumar.com'),
   title: {
     default: 'InsightNow | Breaking News, Latest Headlines & In-Depth Analysis',
     template: '%s | InsightNow',
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     'stock market',
     'tech trends',
   ],
-  authors: [{ name: 'InsightNow Editorial Team', url: 'https://yournewssite.com/about' }],
+  authors: [{ name: 'InsightNow Editorial Team', url: 'https://insightnow.amodkumar.com/about' }],
   creator: 'InsightNow',
   publisher: 'InsightNow Media',
   robots: {
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://yournewssite.com',
+    url: 'https://insightnow.amodkumar.com',
     siteName: 'InsightNow',
     title: 'InsightNow | Breaking News, Latest Headlines & In-Depth Analysis',
     description: 'Stay informed with InsightNow - Your trusted source for breaking news, latest headlines, in-depth analysis, and comprehensive coverage.',
@@ -70,9 +70,9 @@ export const metadata: Metadata = {
     images: ['/og-image.jpg'],
   },
   alternates: {
-    canonical: 'https://yournewssite.com',
+    canonical: 'https://insightnow.amodkumar.com',
     languages: {
-      'en-US': 'https://yournewssite.com',
+      'en-US': 'https://insightnow.amodkumar.com',
     },
   },
   category: 'news',

@@ -20,7 +20,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/admin/'],
       },
     ],
-    sitemap: 'https://yournewssite.com/sitemap.xml',
-    host: 'https://yournewssite.com',
+    sitemap: 'https://insightnow.amodkumar.com/sitemap.xml',
   };
 }
