@@ -1,11 +1,23 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { categories } from '@/lib/data';
 import AdBanner from './Ads';
 
 export default function Sidebar() {
+  const [email, setEmail] = useState('');
+  const [subscribed, setSubscribed] = useState(false);
   const popularTags = ['AI', 'Stock Market', 'Championship', 'Movies', 'Health', 'Space', 'Startups', 'Innovation'];
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (email) {
+      setSubscribed(true);
+      setEmail('');
+      setTimeout(() => setSubscribed(false), 3000);
+    }
+  };
 
   return (
     <aside className="space-y-4 sm:space-y-6">
@@ -21,10 +33,11 @@ export default function Sidebar() {
             <p className="text-primary-100 text-xs sm:text-sm">Daily headlines</p>
           </div>
         </div>
-        <form className="space-y-2 sm:space-y-3" action="#" method="POST">
+        <form className="space-y-2 sm:space-y-3" onSubmit={handleSubscribe}>
           <input
             type="email"
-            name="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="your@email.com"
             className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-white text-gray-900 rounded-lg sm:rounded-xl focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-400 text-sm"
             required
@@ -36,6 +49,9 @@ export default function Sidebar() {
             Subscribe
           </button>
         </form>
+        {subscribed && (
+          <p className="text-center text-sm mt-2 text-primary-100">Thanks for subscribing!</p>
+        )}
       </div>
 
       <AdBanner size="medium-rectangle" className="mx-auto hidden md:block" />
@@ -90,13 +106,15 @@ export default function Sidebar() {
       <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl sm:rounded-2xl p-4 sm:p-6 text-white shadow-xl">
         <div className="text-center">
           <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-accent-400 to-accent-600 rounded-xl sm:rounded-2xl mx-auto mb-3 sm:mb-4 flex items-center justify-center">
-            <span className="text-2xl sm:text-3xl">⚡</span>
+            <span className="text-2xl sm:text-3xl">📧</span>
           </div>
           <h3 className="text-base sm:text-xl font-bold mb-1 sm:mb-2">Stay Updated</h3>
           <p className="text-gray-300 text-xs sm:text-sm mb-3 sm:mb-4">Get breaking news in your inbox.</p>
-          <form className="space-y-2" onSubmit={(e) => e.preventDefault()}>
+          <form className="space-y-2" onSubmit={handleSubscribe}>
             <input
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="your@email.com"
               className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 text-sm focus:outline-none focus:border-white/40"
               required
@@ -105,9 +123,12 @@ export default function Sidebar() {
               type="submit"
               className="w-full px-4 py-2 bg-gradient-to-r from-accent-500 to-accent-600 rounded-lg font-semibold hover:shadow-lg transition-all text-sm"
             >
-              Subscribe
+              {subscribed ? 'Subscribed!' : 'Subscribe'}
             </button>
           </form>
+          {subscribed && (
+            <p className="text-center text-sm mt-2 text-accent-300">Thanks for subscribing!</p>
+          )}
         </div>
       </div>
 
