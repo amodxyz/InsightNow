@@ -1,8 +1,6 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { db } from './firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
 
 interface User {
   id: string;
@@ -25,17 +23,38 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function setCookie(name: string, value: string, days: number = 7) {
+  if (typeof document === 'undefined') return;
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`;
+}
+
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const cookies = document.cookie.split(';');
+  for (const cookie of cookies) {
+    const [key, val] = cookie.trim().split('=');
+    if (key === name) return decodeURIComponent(val);
+  }
+  return null;
+}
+
+function deleteCookie(name: string) {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('insightnow_user');
-    if (savedUser) {
+    const userCookie = getCookie('insightnow_user');
+    if (userCookie) {
       try {
-        setUser(JSON.parse(savedUser));
+        setUser(JSON.parse(userCookie));
       } catch {
-        localStorage.removeItem('insightnow_user');
+        deleteCookie('insightnow_user');
       }
     }
     setLoading(false);
@@ -43,6 +62,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
+      const { db } = await import('@/lib/firebase');
+      const { collection, query, where, getDocs } = await import('firebase/firestore');
+      
       const usersRef = collection(db, 'users');
       const q = query(usersRef, where('email', '==', email));
       const snapshot = await getDocs(q);
@@ -57,7 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (password.length >= 4) {
         const userWithLogin = { ...userData, lastLogin: new Date().toISOString() };
         setUser(userWithLogin);
-        localStorage.setItem('insightnow_user', JSON.stringify(userWithLogin));
+        setCookie('insightnow_user', JSON.stringify(userWithLogin), 7);
         return true;
       }
       return false;
@@ -69,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('insightnow_user');
+    deleteCookie('insightnow_user');
   };
 
   return (
