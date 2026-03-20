@@ -1,8 +1,0 @@
-{
-  "buildCommand": "npm run build",
-  "outputDirectory": "out",
-  "routes": [
-    { "src": "/admin/(.*)", "dest": "/admin/$1/index.html" },
-    { "src": "/(.*)", "dest": "/$1/index.html" }
-  ]
-}
