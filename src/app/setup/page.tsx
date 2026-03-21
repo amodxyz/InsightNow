@@ -117,7 +117,13 @@ export default function SetupPage() {
   const [exists, setExists] = useState(false);
 
   useEffect(() => {
-    checkExistingData();
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('reset') === 'true') {
+      setExists(false);
+      setStatus('idle');
+    } else {
+      checkExistingData();
+    }
   }, []);
 
   const checkExistingData = async () => {
@@ -206,12 +212,20 @@ export default function SetupPage() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Already Set Up!</h1>
           <p className="text-gray-500 mb-6">{message}</p>
-          <Link
-            href="/"
-            className="inline-block px-6 py-3 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors"
-          >
-            Go to Website
-          </Link>
+          <div className="space-y-3">
+            <Link
+              href="/admin/login"
+              className="block w-full px-6 py-3 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors"
+            >
+              Go to Login
+            </Link>
+            <Link
+              href="/setup?reset=true"
+              className="block w-full px-6 py-3 border border-gray-200 text-gray-600 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+            >
+              Reset Data
+            </Link>
+          </div>
         </div>
       </div>
     );
