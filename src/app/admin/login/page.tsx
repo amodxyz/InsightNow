@@ -16,66 +16,23 @@ export default function LoginPage() {
     setError('');
     setIsLoading(true);
 
-    try {
-      const { db } = await import('@/lib/firebase');
-      const { collection, query, where, getDocs } = await import('firebase/firestore');
-      
-      const usersRef = collection(db, 'users');
-      const q = query(usersRef, where('email', '==', email));
-      const snapshot = await getDocs(q);
-      
-      if (snapshot.empty) {
-        // Demo mode - accept any email with password "password"
-        if (password === 'password') {
-          const demoUser = {
-            id: 'demo-1',
-            name: email.split('@')[0],
-            email: email,
-            role: 'admin',
-            avatar: '',
-            bio: 'Demo user',
-            createdAt: new Date().toISOString(),
-            lastLogin: new Date().toISOString()
-          };
-          localStorage.setItem('insightnow_user', JSON.stringify(demoUser));
-          router.push('/admin/');
-          setIsLoading(false);
-          return;
-        }
-        setError('User not found. Please run /setup first.');
-        setIsLoading(false);
-        return;
-      }
+    await new Promise(resolve => setTimeout(resolve, 500));
 
-      const userDoc = snapshot.docs[0];
-      const userData = { id: userDoc.id, ...userDoc.data() };
-
-      if (password.length >= 4) {
-        const userWithLogin = { ...userData, lastLogin: new Date().toISOString() };
-        localStorage.setItem('insightnow_user', JSON.stringify(userWithLogin));
-        router.push('/admin/');
-      } else {
-        setError('Password must be at least 4 characters');
-      }
-    } catch (err: unknown) {
-      console.error('Login error:', err);
-      // Demo mode fallback
-      if (password === 'password') {
-        const demoUser = {
-          id: 'demo-1',
-          name: email.split('@')[0],
-          email: email,
-          role: 'admin',
-          avatar: '',
-          bio: 'Demo user',
-          createdAt: new Date().toISOString(),
-          lastLogin: new Date().toISOString()
-        };
-        localStorage.setItem('insightnow_user', JSON.stringify(demoUser));
-        router.push('/admin/');
-      } else {
-        setError('Database connection error. Please check Firebase setup.');
-      }
+    if (password === 'password') {
+      const demoUser = {
+        id: 'demo-1',
+        name: email.split('@')[0] || 'Admin',
+        email: email || 'admin@insightnow.com',
+        role: 'admin',
+        avatar: '',
+        bio: 'Admin user',
+        createdAt: new Date().toISOString(),
+        lastLogin: new Date().toISOString()
+      };
+      localStorage.setItem('insightnow_user', JSON.stringify(demoUser));
+      router.push('/admin/');
+    } else {
+      setError('Invalid password. Use "password"');
     }
     
     setIsLoading(false);
@@ -99,13 +56,6 @@ export default function LoginPage() {
             {error && (
               <div className="bg-red-50 text-red-600 px-4 py-3 rounded-xl text-sm">
                 {error}
-                {error.includes('setup') && (
-                  <div className="mt-2">
-                    <Link href="/setup" className="underline font-medium">
-                      Go to Setup Page
-                    </Link>
-                  </div>
-                )}
               </div>
             )}
             
@@ -117,7 +67,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-                placeholder="admin@amodkumar.com"
+                placeholder="admin@insightnow.com"
               />
             </div>
 
@@ -129,7 +79,7 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-                placeholder="Enter password"
+                placeholder="password"
               />
             </div>
 
@@ -142,10 +92,8 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-gray-500 space-y-2">
-            <p>Demo credentials:</p>
-            <p className="font-mono text-xs">admin@amodkumar.com / password</p>
-            <p className="text-xs">First time? <Link href="/setup" className="text-primary-600 hover:underline">Run Setup</Link></p>
+          <div className="mt-6 text-center text-sm text-gray-500">
+            <p>Demo: use password <span className="font-mono bg-gray-100 px-2 py-1 rounded">password</span></p>
           </div>
         </div>
       </div>
