@@ -14,7 +14,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    if (pathname === '/admin/login') {
+    if (pathname === '/admin/login' || pathname === '/admin/login/') {
       setIsChecking(false);
       return;
     }
@@ -40,7 +40,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (pathname === '/admin/login') {
+  if (pathname === '/admin/login' || pathname === '/admin/login/') {
     return <>{children}</>;
   }
 
