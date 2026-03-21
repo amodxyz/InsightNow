@@ -2,7 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getCategories, createCategory, deleteCategory, initializeStorage, Category } from '@/lib/storage';
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string;
+  description: string;
+  articleCount: number;
+}
 
 const colorOptions = [
   'bg-blue-100 text-blue-700',
@@ -15,40 +23,52 @@ const colorOptions = [
   'bg-teal-100 text-teal-700',
 ];
 
+const defaultCategories: Category[] = [
+  { id: '1', name: 'Technology', slug: 'technology', icon: '💻', description: 'Latest tech news', articleCount: 3 },
+  { id: '2', name: 'Business', slug: 'business', icon: '📈', description: 'Business updates', articleCount: 2 },
+  { id: '3', name: 'Sports', slug: 'sports', icon: '⚽', description: 'Sports news', articleCount: 2 },
+  { id: '4', name: 'Entertainment', slug: 'entertainment', icon: '🎬', description: 'Movies & more', articleCount: 1 },
+  { id: '5', name: 'Health', slug: 'health', icon: '🏥', description: 'Health tips', articleCount: 1 },
+  { id: '6', name: 'Science', slug: 'science', icon: '🔬', description: 'Scientific discoveries', articleCount: 1 },
+];
+
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newCategory, setNewCategory] = useState({ name: '', slug: '', icon: '📰', description: '' });
 
   useEffect(() => {
-    const loadCategories = async () => {
-      initializeStorage();
-      const data = await getCategories();
-      setCategories(data);
-    };
-    loadCategories();
+    const stored = localStorage.getItem('insightnow_categories');
+    if (stored) {
+      setCategories(JSON.parse(stored));
+    } else {
+      setCategories(defaultCategories);
+      localStorage.setItem('insightnow_categories', JSON.stringify(defaultCategories));
+    }
   }, []);
 
-  const handleCreateCategory = async (e: React.FormEvent) => {
+  const handleCreateCategory = (e: React.FormEvent) => {
     e.preventDefault();
-    await createCategory({
+    const category: Category = {
+      id: Date.now().toString(),
       name: newCategory.name,
       slug: newCategory.slug || newCategory.name.toLowerCase().replace(/\s+/g, '-'),
       icon: newCategory.icon,
       description: newCategory.description,
       articleCount: 0,
-    });
-    const data = await getCategories();
-    setCategories(data);
+    };
+    const updated = [...categories, category];
+    setCategories(updated);
+    localStorage.setItem('insightnow_categories', JSON.stringify(updated));
     setNewCategory({ name: '', slug: '', icon: '📰', description: '' });
     setIsModalOpen(false);
   };
 
-  const handleDelete = async (id: string, name: string) => {
+  const handleDelete = (id: string, name: string) => {
     if (confirm(`Delete "${name}" category?`)) {
-      await deleteCategory(id);
-      const data = await getCategories();
-      setCategories(data);
+      const updated = categories.filter(c => c.id !== id);
+      setCategories(updated);
+      localStorage.setItem('insightnow_categories', JSON.stringify(updated));
     }
   };
 
@@ -63,7 +83,7 @@ export default function CategoriesPage() {
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors shadow-lg shadow-primary-500/30"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -149,7 +169,7 @@ export default function CategoriesPage() {
                   value={newCategory.description}
                   onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
                   className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none resize-none"
-                  placeholder="Brief description of the category"
+                  placeholder="Brief description"
                   rows={2}
                 />
               </div>
@@ -157,13 +177,13 @@ export default function CategoriesPage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                  className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 px-4 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors"
+                  className="flex-1 px-4 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700"
                 >
                   Add Category
                 </button>
