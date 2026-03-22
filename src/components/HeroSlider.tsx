@@ -3,7 +3,24 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Article } from '@/lib/data';
+
+interface Article {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  category: string;
+  categorySlug: string;
+  author: string;
+  authorId: string;
+  publishedAt: string;
+  imageUrl: string;
+  tags: string[];
+  readTime: number;
+  featured: boolean;
+  status: string;
+}
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('en-US', {

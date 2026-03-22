@@ -1,6 +1,31 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Article, formatDate } from '@/lib/data';
+
+interface Article {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  category: string;
+  categorySlug: string;
+  author: string;
+  authorId: string;
+  publishedAt: string;
+  imageUrl: string;
+  tags: string[];
+  readTime: number;
+  featured: boolean;
+  status: string;
+}
+
+function formatDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
 
 interface ArticleCardProps {
   article: Article;
