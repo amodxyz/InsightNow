@@ -1,16 +1,12 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Metadata } from 'next';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ArticleCard from '@/components/ArticleCard';
-import Sidebar from '@/components/Sidebar';
 import HeroSlider from '@/components/HeroSlider';
 import { AdBetweenSections, AdInHomepage } from '@/components/Ads';
-
-export const metadata: Metadata = {
-  title: 'InsightNow | Breaking News, Latest Headlines & In-Depth Analysis',
-  description: 'Stay informed with InsightNow - Your trusted source for breaking news, latest headlines, in-depth analysis, and comprehensive coverage.',
-};
 
 interface Article {
   id: string;
@@ -187,23 +183,25 @@ const defaultArticles: Article[] = [
   },
 ];
 
-function getData(): { articles: Article[]; categories: Category[] } {
-  if (typeof window === 'undefined') {
-    return { articles: defaultArticles, categories: defaultCategories };
-  }
-  
-  const storedArticles = localStorage.getItem('insightnow_articles');
-  const storedCategories = localStorage.getItem('insightnow_categories');
-  
-  const articles: Article[] = storedArticles ? JSON.parse(storedArticles) : defaultArticles;
-  const categories: Category[] = storedCategories ? JSON.parse(storedCategories) : defaultCategories;
-  
-  return { articles, categories };
-}
-
 export default function HomePage() {
-  const { articles, categories } = getData();
-  const publishedArticles = articles.filter((a: Article) => a.status === 'published');
+  const [articles, setArticles] = useState<Article[]>(defaultArticles);
+  const [categories, setCategories] = useState<Category[]>(defaultCategories);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const storedArticles = localStorage.getItem('insightnow_articles');
+    const storedCategories = localStorage.getItem('insightnow_categories');
+    
+    if (storedArticles) {
+      setArticles(JSON.parse(storedArticles));
+    }
+    if (storedCategories) {
+      setCategories(JSON.parse(storedCategories));
+    }
+  }, []);
+
+  const publishedArticles = articles.filter((a) => a.status === 'published');
   const sliderArticles = publishedArticles.slice(0, 4);
   const latestArticles = publishedArticles.slice(1, 7);
 
@@ -235,7 +233,7 @@ export default function HomePage() {
               </Link>
             </div>
             <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {latestArticles.map((article: Article) => (
+              {latestArticles.map((article) => (
                 <ArticleCard key={article.id} article={article} />
               ))}
             </div>
@@ -251,7 +249,7 @@ export default function HomePage() {
               <p className="text-gray-500 mt-2 text-sm sm:text-base">Explore topics that interest you</p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 sm:gap-4">
-              {categories.map((cat: Category, index: number) => (
+              {categories.map((cat, index) => (
                 <Link
                   key={cat.slug}
                   href={`/category/${cat.slug}/`}
@@ -266,7 +264,7 @@ export default function HomePage() {
                   </div>
                   <h3 className="font-semibold text-gray-900 group-hover:text-primary-600 transition-colors text-sm sm:text-base">{cat.name}</h3>
                   <p className="text-[10px] sm:text-xs text-gray-400 mt-1">
-                    {articles.filter((a: Article) => a.categorySlug === cat.slug).length} articles
+                    {articles.filter((a) => a.categorySlug === cat.slug).length} articles
                   </p>
                 </Link>
               ))}
