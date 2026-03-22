@@ -4,11 +4,19 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import RichTextEditor from '@/components/admin/RichTextEditor';
-import { createArticle, getCategories, initializeStorage } from '@/lib/storage';
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string;
+  description: string;
+  articleCount: number;
+}
 
 export default function NewArticlePage() {
   const router = useRouter();
-  const [categories, setCategories] = useState<{ name: string; slug: string }[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [article, setArticle] = useState({
     title: '',
@@ -18,7 +26,6 @@ export default function NewArticlePage() {
     category: '',
     categorySlug: '',
     author: '',
-    authorId: '',
     tags: '',
     status: 'draft' as 'draft' | 'published' | 'archived',
     imageUrl: '',
@@ -27,12 +34,10 @@ export default function NewArticlePage() {
   });
 
   useEffect(() => {
-    const loadCategories = async () => {
-      initializeStorage();
-      const cats = await getCategories();
-      setCategories(cats.map(c => ({ name: c.name, slug: c.slug })));
-    };
-    loadCategories();
+    const stored = localStorage.getItem('insightnow_categories');
+    if (stored) {
+      setCategories(JSON.parse(stored));
+    }
   }, []);
 
   const handleContentChange = (html: string) => {
@@ -59,36 +64,39 @@ export default function NewArticlePage() {
     return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
   };
 
-  const handleSubmit = async (e: React.FormEvent, publishStatus: 'draft' | 'published') => {
+  const handleSubmit = (e: React.FormEvent, publishStatus: 'draft' | 'published') => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    try {
-      const tagsArray = article.tags.split(',').map(t => t.trim()).filter(Boolean);
-      const slug = article.slug || generateSlug(article.title);
-      
-      await createArticle({
-        title: article.title,
-        slug,
-        excerpt: article.excerpt,
-        content: article.content,
-        category: article.category,
-        categorySlug: article.categorySlug || generateSlug(article.category),
-        author: article.author,
-        authorId: '1',
-        publishedAt: article.publishedAt,
-        imageUrl: article.imageUrl || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800&h=400&fit=crop',
-        tags: tagsArray,
-        readTime: calculateReadTime(article.content),
-        featured: article.featured,
-        status: publishStatus,
-      });
+    const tagsArray = article.tags.split(',').map(t => t.trim()).filter(Boolean);
+    const slug = article.slug || generateSlug(article.title);
+    
+    const newArticle = {
+      id: Date.now().toString(),
+      title: article.title,
+      slug,
+      excerpt: article.excerpt,
+      content: article.content,
+      category: article.category,
+      categorySlug: article.categorySlug,
+      author: article.author || 'Admin',
+      authorId: '1',
+      publishedAt: article.publishedAt,
+      imageUrl: article.imageUrl || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800&h=400&fit=crop',
+      tags: tagsArray,
+      readTime: calculateReadTime(article.content),
+      featured: article.featured,
+      status: publishStatus,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
 
-      router.push('/admin/articles/');
-    } catch (error) {
-      console.error('Failed to create article:', error);
-      setIsSubmitting(false);
-    }
+    const stored = localStorage.getItem('insightnow_articles');
+    const articles = stored ? JSON.parse(stored) : [];
+    articles.unshift(newArticle);
+    localStorage.setItem('insightnow_articles', JSON.stringify(articles));
+
+    router.push('/admin/articles/');
   };
 
   return (
@@ -135,7 +143,7 @@ export default function NewArticlePage() {
                   value={article.excerpt}
                   onChange={(e) => setArticle({ ...article, excerpt: e.target.value })}
                   className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none resize-none"
-                  placeholder="Brief description of the article (appears in search results)"
+                  placeholder="Brief description"
                 />
               </div>
               <div>
@@ -143,23 +151,7 @@ export default function NewArticlePage() {
                 <RichTextEditor 
                   value={article.content} 
                   onChange={handleContentChange}
-                  placeholder="Start writing your article..."
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 className="font-semibold text-gray-900 mb-4">SEO Settings</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Keywords</label>
-                <input
-                  type="text"
-                  value={article.tags}
-                  onChange={(e) => setArticle({ ...article, tags: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-                  placeholder="AI, Technology, News (comma separated)"
+                  placeholder="Start writing..."
                 />
               </div>
             </div>
@@ -176,7 +168,7 @@ export default function NewArticlePage() {
                   type="date"
                   value={article.publishedAt}
                   onChange={(e) => setArticle({ ...article, publishedAt: e.target.value })}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl"
                 />
               </div>
               <div className="flex items-center gap-2">
@@ -185,16 +177,16 @@ export default function NewArticlePage() {
                   id="featured"
                   checked={article.featured}
                   onChange={(e) => setArticle({ ...article, featured: e.target.checked })}
-                  className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                  className="w-4 h-4 text-primary-600"
                 />
-                <label htmlFor="featured" className="text-sm text-gray-700">Featured Article</label>
+                <label htmlFor="featured" className="text-sm text-gray-700">Featured</label>
               </div>
               <div className="flex gap-3">
                 <button
                   type="button"
                   onClick={(e) => handleSubmit(e, 'draft')}
                   disabled={isSubmitting}
-                  className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-xl font-medium disabled:opacity-50"
                 >
                   Save Draft
                 </button>
@@ -202,7 +194,7 @@ export default function NewArticlePage() {
                   type="button"
                   onClick={(e) => handleSubmit(e, 'published')}
                   disabled={isSubmitting || !article.title || !article.excerpt}
-                  className="flex-1 px-4 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors disabled:opacity-50"
+                  className="flex-1 px-4 py-2.5 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 disabled:opacity-50"
                 >
                   Publish
                 </button>
@@ -219,21 +211,20 @@ export default function NewArticlePage() {
             >
               <option value="">Select Category</option>
               {categories.map((cat) => (
-                <option key={cat.slug} value={cat.name}>{cat.name}</option>
+                <option key={cat.id} value={cat.name}>{cat.name}</option>
               ))}
             </select>
           </div>
 
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 className="font-semibold text-gray-900 mb-4">Featured Image</h3>
+            <h3 className="font-semibold text-gray-900 mb-4">Featured Image URL</h3>
             <input
               type="url"
               value={article.imageUrl}
               onChange={(e) => setArticle({ ...article, imageUrl: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none mb-3"
-              placeholder="https://example.com/image.jpg"
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl"
+              placeholder="https://..."
             />
-            <p className="text-xs text-gray-400">Enter image URL (Recommended: 1200x630px)</p>
           </div>
 
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -242,21 +233,9 @@ export default function NewArticlePage() {
               type="text"
               value={article.author}
               onChange={(e) => setArticle({ ...article, author: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl"
               placeholder="Author name"
             />
-          </div>
-
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 className="font-semibold text-gray-900 mb-4">Tags</h3>
-            <input
-              type="text"
-              value={article.tags}
-              onChange={(e) => setArticle({ ...article, tags: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-              placeholder="AI, Technology, News"
-            />
-            <p className="text-xs text-gray-400 mt-2">Separate tags with commas</p>
           </div>
         </div>
       </form>
