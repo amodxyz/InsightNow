@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import RichTextEditor from '@/components/admin/RichTextEditor';
@@ -16,8 +16,10 @@ interface Category {
 
 export default function NewArticlePage() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [article, setArticle] = useState({
     title: '',
     slug: '',
@@ -39,6 +41,22 @@ export default function NewArticlePage() {
       setCategories(JSON.parse(stored));
     }
   }, []);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setArticle({ ...article, imageUrl: reader.result as string });
+      setUploading(false);
+    };
+    reader.onerror = () => {
+      setUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleContentChange = (html: string) => {
     setArticle({ ...article, content: html });
@@ -217,14 +235,56 @@ export default function NewArticlePage() {
           </div>
 
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <h3 className="font-semibold text-gray-900 mb-4">Featured Image URL</h3>
-            <input
-              type="url"
-              value={article.imageUrl}
-              onChange={(e) => setArticle({ ...article, imageUrl: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl"
-              placeholder="https://..."
-            />
+            <h3 className="font-semibold text-gray-900 mb-4">Featured Image</h3>
+            <div className="space-y-4">
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+              <div 
+                className="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center cursor-pointer hover:border-primary-400 transition-colors"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {article.imageUrl ? (
+                  <div className="relative">
+                    <img src={article.imageUrl} alt="Preview" className="max-h-48 mx-auto rounded-lg object-contain" />
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setArticle({ ...article, imageUrl: '' }); }}
+                      className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="py-8">
+                    {uploading ? (
+                      <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-600 border-t-transparent mx-auto"></div>
+                    ) : (
+                      <>
+                        <svg className="w-10 h-10 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p className="text-sm text-gray-500">Click to upload image</p>
+                        <p className="text-xs text-gray-400 mt-1">PNG, JPG, GIF up to 5MB</p>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+              <input
+                type="url"
+                value={article.imageUrl}
+                onChange={(e) => setArticle({ ...article, imageUrl: e.target.value })}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm"
+                placeholder="Or paste image URL here..."
+              />
+            </div>
           </div>
 
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
