@@ -30,7 +30,7 @@ export default function LoginPage() {
         lastLogin: new Date().toISOString()
       };
       localStorage.setItem('insightnow_user', JSON.stringify(demoUser));
-      router.push('/admin/');
+      window.location.href = '/admin/';
     } else {
       setError('Invalid password. Use "password"');
     }
