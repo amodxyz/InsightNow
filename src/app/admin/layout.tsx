@@ -1,35 +1,46 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminMobileMenu from '@/components/admin/AdminMobileMenu';
-import { AuthProvider, useAuth } from '@/lib/auth';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+  const [user, setUser] = useState<User | null>(null);
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    if (pathname === '/admin/login' || pathname === '/admin/login/') {
+    const isLoginPage = pathname === '/admin/login' || pathname === '/admin/login/';
+    
+    if (isLoginPage) {
       setIsChecking(false);
       return;
     }
 
     const savedUser = localStorage.getItem('insightnow_user');
-    if (!savedUser) {
-      router.push('/admin/login');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        window.location.href = '/admin/login/';
+      }
     } else {
-      setIsChecking(false);
+      window.location.href = '/admin/login/';
     }
-  }, [pathname, router]);
+    setIsChecking(false);
+  }, [pathname]);
 
   const handleLogout = () => {
-    logout();
-    router.push('/admin/login');
+    localStorage.removeItem('insightnow_user');
+    window.location.href = '/admin/login/';
   };
 
   if (isChecking) {
@@ -61,7 +72,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
               {user && (
                 <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg">
                   <div className="w-6 h-6 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center text-white text-xs font-medium">
-                    {user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                    {user.name ? user.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) : 'A'}
                   </div>
                   <span className="text-sm text-gray-700">{user.name}</span>
                 </div>
@@ -86,9 +97,5 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 }
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <AuthProvider>
-      <AdminLayoutContent>{children}</AdminLayoutContent>
-    </AuthProvider>
-  );
+  return <AdminLayoutContent>{children}</AdminLayoutContent>;
 }
